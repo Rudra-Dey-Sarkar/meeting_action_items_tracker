@@ -1,4 +1,4 @@
-import { ActionItem, ActionItemInput, ActionItemSchema } from "./types";
+import { ActionItem, ActionItemInput, ActionItemSchema } from "@/types/action-item";
 import { z } from "zod";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";

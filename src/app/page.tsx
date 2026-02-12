@@ -1,76 +1,128 @@
 "use client";
 
-import { useState } from "react";
-import { Transcript } from "@/lib/types";
-import { TranscriptInput } from "@/components/TranscriptInput";
-import { ActionItemList } from "@/components/ActionItemList";
-import { HistorySidebar } from "@/components/HistorySidebar";
-import { Toaster } from "@/components/ui/sonner";
+import { useEffect, useState } from "react";
+import { Transcript } from "@/types/transcript";
+import { ActionItem } from "@/types/action-item";
+import { TranscriptInput } from "@/components/transcript-input";
+import { ActionItemList } from "@/components/actionItem-list";
+import { toast } from "sonner";
+import { useTranscript } from "@/context/transcript-context";
 
 export default function Home() {
-  const [currentTranscript, setCurrentTranscript] = useState<Transcript | null>(null);
-  const [refreshTrigger, setRefreshTrigger] = useState<number>(0);
+  const { currentTranscript, setCurrentTranscript } = useTranscript();
 
-  const handleTranscriptProcessed = (data: Transcript) => {
+  // Extract Transcript
+  const handleTranscriptSubmit = async (transcript: string) => {
+    const res = await fetch("/api/transcripts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ transcript }),
+    });
+
+    if (!res.ok) {
+      toast.error("Failed to process transcript");
+      return;
+    }
+
+    const data = await res.json();
     setCurrentTranscript(data);
-    setRefreshTrigger((prev) => prev + 1);
+    toast.success("Action items extracted");
   };
 
-  const handleSelectHistory = (transcript: Transcript) => {
-    setCurrentTranscript(transcript);
+  // Add Action Item
+  const addActionItem = async (form: Partial<ActionItem>) => {
+    if (!currentTranscript) return;
+
+    const res = await fetch("/api/action-items", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...form,
+        transcript_id: currentTranscript.id,
+      }),
+    });
+
+    if (!res.ok) return toast.error("Failed to add task");
+
+    const newItem = await res.json();
+
+    setCurrentTranscript({
+      ...currentTranscript,
+      action_items: [...(currentTranscript.action_items ?? []), newItem],
+    });
+    toast.success("Task added successfully");
   };
 
-  const handleItemsRefresh = () => {
-    setRefreshTrigger((prev) => prev + 1);
+  // Update Item
+  const updateItem = async (id: string, data: Partial<ActionItem>) => {
+    const res = await fetch(`/api/action-items/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (!res.ok) return toast.error("Failed to update task");
+
+    const updated = await res.json();
+
+    if (!currentTranscript) return;
+
+    setCurrentTranscript({
+      ...currentTranscript,
+      action_items: currentTranscript.action_items?.map((item) =>
+        item.id === id ? updated : item
+      ),
+    });
+    toast.success("Task updated successfully");
+  };
+
+  // Delete Item
+  const deleteItem = async (id: string) => {
+    const res = await fetch(`/api/action-items/${id}`, {
+      method: "DELETE",
+    });
+
+    if (!res.ok) return toast.error("Delete failed");
+
+    if (!currentTranscript) return;
+
+    setCurrentTranscript({
+      ...currentTranscript,
+      action_items: currentTranscript.action_items?.filter(
+        (item) => item.id !== id
+      ),
+    });
+
+    toast.warning("Task deleted successfully");
   };
 
   return (
-    <div className="flex h-screen w-full bg-background text-foreground">
-      <HistorySidebar
-        onSelect={handleSelectHistory}
-        refreshTrigger={refreshTrigger}
-      />
+    <main className="w-full flex-1 p-4 md:p-6 overflow-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 h-full">
 
-      <main className="flex-1 flex flex-col p-6 overflow-hidden">
-        <header className="mb-6 border-b pb-4">
-          <h1 className="text-2xl font-bold tracking-tight">
-            Meeting Action Items Tracker
-          </h1>
-          <p className="text-muted-foreground">
-            Extract and manage tasks from your meeting transcripts.
-          </p>
-        </header>
+        <div className="space-y-6 h-full flex flex-col">
+          <TranscriptInput onSubmit={handleTranscriptSubmit} />
+        </div>
 
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 overflow-hidden">
-          <div className="flex flex-col space-y-4 overflow-y-auto pr-2">
-            <TranscriptInput onSuccess={handleTranscriptProcessed} />
-
-            {currentTranscript && (
-              <div className="mt-6 p-4 border rounded-md bg-muted/20">
-                <h3 className="font-semibold mb-2">Transcript Content</h3>
-                <p className="whitespace-pre-wrap text-sm text-muted-foreground">
-                  {currentTranscript.content}
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="flex flex-col overflow-y-auto pl-2">
-            {currentTranscript ? (
+        <div className="h-full flex flex-col">
+          {currentTranscript ? (
+            <div className="flex-1 overflow-auto">
               <ActionItemList
                 items={currentTranscript.action_items ?? []}
-                transcriptId={currentTranscript.id}
-                onRefresh={handleItemsRefresh}
+                onAdd={addActionItem}
+                onUpdate={updateItem}
+                onDelete={deleteItem}
               />
-            ) : (
-              <div className="flex items-center justify-center h-full text-muted-foreground border-2 border-dashed rounded-lg">
-                Select a transcript or extract items from a new one.
-              </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="flex-1 flex items-center justify-center border rounded-lg text-muted-foreground text-sm p-6">
+              Select a transcript or extract a new one.
+            </div>
+          )}
         </div>
-      </main>
-      <Toaster />
-    </div>
+
+
+      </div>
+    </main>
   );
 }

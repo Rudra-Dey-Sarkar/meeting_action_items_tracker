@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
         // 1 Extract from LLM
         const actionItemsData = await extractActionItems(transcript);
-
+        
         // 2 Transaction
         await sql`BEGIN`;
 
