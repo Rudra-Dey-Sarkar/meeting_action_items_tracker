@@ -62,4 +62,5 @@ function CreateNewTaskModal({ onAdd, isModalOpen, setIsModalOpen }: CreateNewTas
     )
 }
 
+
 export default CreateNewTaskModal
