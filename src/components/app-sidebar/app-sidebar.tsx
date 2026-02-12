@@ -21,14 +21,13 @@ export function AppSidebar() {
     const { setCurrentTranscript } = useTranscript();
 
     useEffect(() => {
-        const fetchHistory = async () => {
+        (async () => {
             const res = await fetch("/api/transcripts");
             if (res.ok) {
                 const data = await res.json();
                 setHistory(data);
             }
-        };
-        fetchHistory();
+        })();
     }, []);
 
     return (

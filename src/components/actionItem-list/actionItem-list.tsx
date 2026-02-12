@@ -33,18 +33,27 @@ export function ActionItemList({
     const [dateFilter, setDateFilter] = useState<string>("");
 
     /* filter */
+    const normalize = (date: string) => {
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, "0");
+        const day = String(d.getDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+    };
+
     const filteredItems = useMemo(() => {
         return items.filter((item) => {
             const statusMatch =
                 filter === "all" ? true : item.status === filter;
 
             const dateMatch = dateFilter
-                ? item.due_date?.split("T")[0] === dateFilter
+                ? item.due_date && normalize(item.due_date) === dateFilter
                 : true;
 
             return statusMatch && dateMatch;
         });
     }, [items, filter, dateFilter]);
+
 
     return (
         <div className="space-y-6">
