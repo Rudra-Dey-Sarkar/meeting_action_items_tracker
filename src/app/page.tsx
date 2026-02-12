@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Transcript } from "@/types/transcript";
 import { ActionItem } from "@/types/action-item";
-import { TranscriptInput } from "@/components/transcript-input";
-import { ActionItemList } from "@/components/actionItem-list";
+import { TranscriptInput } from "@/components/transcript-input/transcript-input";
+import { ActionItemList } from "@/components/actionItem-list/actionItem-list";
 import { toast } from "sonner";
 import { useTranscript } from "@/context/transcript-context";
+import { FullTranscript } from "@/components/full-transcript/full-transcript";
 
 export default function Home() {
   const { currentTranscript, setCurrentTranscript } = useTranscript();
@@ -102,6 +101,7 @@ export default function Home() {
 
         <div className="space-y-6 h-full flex flex-col">
           <TranscriptInput onSubmit={handleTranscriptSubmit} />
+          <FullTranscript transcript={currentTranscript} />
         </div>
 
         <div className="h-full flex flex-col">

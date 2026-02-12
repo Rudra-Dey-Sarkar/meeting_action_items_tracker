@@ -1,11 +1,12 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ActionItem } from "@/types/action-item";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pencil, Check, X } from "lucide-react";
+import CreateNewTaskModal from "./create-new-task-modal";
+import Filters from "./filters";
 
 interface Props {
     items: ActionItem[];
@@ -14,7 +15,7 @@ interface Props {
     onDelete: (id: string) => void;
 }
 
-interface FormValues {
+export interface FormValues {
     task: string;
     owner?: string;
     due_date?: string;
@@ -26,38 +27,50 @@ export function ActionItemList({
     onUpdate,
     onDelete,
 }: Props) {
-    const { register, handleSubmit, reset } = useForm<FormValues>();
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editValues, setEditValues] = useState<FormValues | null>(null);
+    const [filter, setFilter] = useState<"all" | "pending" | "done">("all");
+    const [dateFilter, setDateFilter] = useState<string>("");
+
+    /* filter */
+    const filteredItems = useMemo(() => {
+        return items.filter((item) => {
+            const statusMatch =
+                filter === "all" ? true : item.status === filter;
+
+            const dateMatch = dateFilter
+                ? item.due_date?.split("T")[0] === dateFilter
+                : true;
+
+            return statusMatch && dateMatch;
+        });
+    }, [items, filter, dateFilter]);
 
     return (
         <div className="space-y-6">
 
-            {/* Add Form */}
-            <form
-                onSubmit={handleSubmit((data) => {
-                    onAdd(data);
-                    reset();
-                })}
-                className="grid grid-cols-1 sm:grid-cols-3 gap-3"
-            >
-                <Input {...register("task", { required: true })} placeholder="Task" />
-                <Input {...register("owner")} placeholder="Owner" />
-                <Input {...register("due_date")} type="date" />
-                <Button type="submit" className="sm:col-span-3">
-                    Add Item
-                </Button>
-            </form>
+            {/* Top Bar */}
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
+                <Filters
+                    filter={filter}
+                    setFilter={setFilter}
+                    dateFilter={dateFilter}
+                    setDateFilter={setDateFilter}
+                />
+
+                <CreateNewTaskModal onAdd={onAdd} />
+            </div>
 
             {/* Items */}
             <div className="space-y-3">
-                {items.length === 0 && (
+
+                {filteredItems.length === 0 && (
                     <div className="text-sm text-muted-foreground text-center p-6 border rounded-lg">
-                        No action items yet.
+                        No matching tasks.
                     </div>
                 )}
 
-                {items.map((item) => {
+                {filteredItems.map((item) => {
                     const isEditing = editingId === item.id;
 
                     return (
@@ -65,14 +78,17 @@ export function ActionItemList({
                             key={item.id}
                             className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-lg gap-3"
                         >
-                            {/* Left Content */}
+                            {/* Left */}
                             <div className="flex-1 space-y-2">
                                 {isEditing ? (
                                     <>
                                         <Input
                                             value={editValues?.task || ""}
                                             onChange={(e) =>
-                                                setEditValues({ ...editValues!, task: e.target.value })
+                                                setEditValues({
+                                                    ...editValues!,
+                                                    task: e.target.value,
+                                                })
                                             }
                                         />
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -102,8 +118,8 @@ export function ActionItemList({
                                     <>
                                         <p
                                             className={`font-medium ${item.status === "done"
-                                                    ? "line-through text-muted-foreground"
-                                                    : ""
+                                                ? "line-through text-muted-foreground"
+                                                : ""
                                                 }`}
                                         >
                                             {item.task}
@@ -118,8 +134,9 @@ export function ActionItemList({
                                 )}
                             </div>
 
-                            {/* Right Buttons */}
-                            <div className="flex gap-2">
+                            {/* Right */}
+                            <div className="flex gap-2 flex-wrap">
+
                                 {isEditing ? (
                                     <>
                                         <Button
@@ -145,6 +162,7 @@ export function ActionItemList({
                                         <Button
                                             size="sm"
                                             variant="outline"
+                                            className="cursor-pointer"
                                             onClick={() =>
                                                 onUpdate(item.id, {
                                                     status:
@@ -160,12 +178,14 @@ export function ActionItemList({
                                         <Button
                                             size="sm"
                                             variant="outline"
+                                            className="cursor-pointer"
                                             onClick={() => {
                                                 setEditingId(item.id);
                                                 setEditValues({
                                                     task: item.task,
                                                     owner: item.owner || "",
-                                                    due_date: item.due_date?.split("T")[0] || "",
+                                                    due_date:
+                                                        item.due_date?.split("T")[0] || "",
                                                 });
                                             }}
                                         >
@@ -175,6 +195,7 @@ export function ActionItemList({
                                         <Button
                                             size="sm"
                                             variant="destructive"
+                                            className="cursor-pointer"
                                             onClick={() => onDelete(item.id)}
                                         >
                                             Delete

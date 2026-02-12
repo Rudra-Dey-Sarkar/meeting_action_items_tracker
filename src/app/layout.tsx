@@ -4,7 +4,7 @@ import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { TranscriptProvider } from "@/context/transcript-context";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { AppSidebar } from "@/components/app-sidebar";
+import { AppSidebar } from "@/components/app-sidebar/app-sidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
