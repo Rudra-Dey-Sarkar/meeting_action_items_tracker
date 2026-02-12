@@ -6,12 +6,15 @@ import { ActionItemList } from "@/components/actionItem-list/actionItem-list";
 import { toast } from "sonner";
 import { useTranscript } from "@/context/transcript-context";
 import { FullTranscript } from "@/components/full-transcript/full-transcript";
+import { useState } from "react";
 
 export default function Home() {
-  const { currentTranscript, setCurrentTranscript } = useTranscript();
+  const { currentTranscript, setCurrentTranscript, fetchTranscrips } = useTranscript();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   // Extract Transcript
   const handleTranscriptSubmit = async (transcript: string) => {
+    setIsLoading(true);
     const res = await fetch("/api/transcripts", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -20,11 +23,14 @@ export default function Home() {
 
     if (!res.ok) {
       toast.error("Failed to process transcript");
+      setIsLoading(false);
       return;
     }
 
     const data = await res.json();
+    fetchTranscrips();
     setCurrentTranscript(data);
+    setIsLoading(false);
     toast.success("Action items extracted");
   };
 
@@ -100,7 +106,9 @@ export default function Home() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 h-full">
 
         <div className="space-y-6 h-full flex flex-col">
-          <TranscriptInput onSubmit={handleTranscriptSubmit} />
+          <TranscriptInput
+            onSubmit={handleTranscriptSubmit}
+            isLoading={isLoading} />
           <FullTranscript transcript={currentTranscript} />
         </div>
 

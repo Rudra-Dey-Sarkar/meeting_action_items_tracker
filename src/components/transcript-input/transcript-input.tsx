@@ -6,9 +6,10 @@ import { Textarea } from "@/components/ui/textarea";
 
 interface Props {
     onSubmit: (transcript: string) => void;
+    isLoading: boolean
 }
 
-export function TranscriptInput({ onSubmit }: Props) {
+export function TranscriptInput({ onSubmit, isLoading }: Props) {
     const { register, handleSubmit, reset } = useForm<{ transcript: string }>();
 
     return (
@@ -25,8 +26,15 @@ export function TranscriptInput({ onSubmit }: Props) {
                 className="min-h-[150px]"
             />
 
-            <Button type="submit" className="w-full">
-                Extract Action Items
+            <Button 
+            disabled={isLoading}
+            type="submit" 
+            className="w-full">
+                {isLoading ? 
+                "Extracting Actions....."
+                :
+                "Extract Action Items"
+                }
             </Button>
         </form>
     );

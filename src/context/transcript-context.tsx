@@ -1,11 +1,13 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { Transcript } from "@/types/transcript";
 
 interface TranscriptContextType {
   currentTranscript: Transcript | null;
   setCurrentTranscript: (t: Transcript | null) => void;
+  history: Transcript[];
+  fetchTranscrips: () => Promise<void>;
 }
 
 const TranscriptContext = createContext<TranscriptContextType | undefined>(
@@ -17,12 +19,24 @@ export function TranscriptProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [currentTranscript, setCurrentTranscript] =
-    useState<Transcript | null>(null);
+  const [currentTranscript, setCurrentTranscript] = useState<Transcript | null>(null);
+  const [history, setHistory] = useState<Transcript[]>([]);
+
+  const fetchTranscrips = async () => {
+    const res = await fetch("/api/transcripts");
+    if (res.ok) {
+      const data = await res.json();
+      setHistory(data);
+    }
+  }
+
+  useEffect(() => {
+    fetchTranscrips();
+  }, []);
 
   return (
     <TranscriptContext.Provider
-      value={{ currentTranscript, setCurrentTranscript }}
+      value={{ currentTranscript, setCurrentTranscript, history, fetchTranscrips }}
     >
       {children}
     </TranscriptContext.Provider>

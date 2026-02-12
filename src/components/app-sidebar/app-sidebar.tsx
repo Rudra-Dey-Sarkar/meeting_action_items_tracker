@@ -17,18 +17,7 @@ import { FileText, LayoutDashboard, MonitorCheck } from "lucide-react";
 import Link from "next/link";
 
 export function AppSidebar() {
-    const [history, setHistory] = useState<Transcript[]>([]);
-    const { setCurrentTranscript } = useTranscript();
-
-    useEffect(() => {
-        (async () => {
-            const res = await fetch("/api/transcripts");
-            if (res.ok) {
-                const data = await res.json();
-                setHistory(data);
-            }
-        })();
-    }, []);
+    const { setCurrentTranscript, history } = useTranscript();
 
     return (
         <Sidebar className="border-r">
