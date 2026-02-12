@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react'
+import React, { Dispatch, SetStateAction } from 'react'
 import {
     Dialog,
     DialogContent,
@@ -15,11 +15,18 @@ import { Plus } from 'lucide-react';
 import { Input } from '../ui/input';
 import { ActionItem } from '@/types/action-item';
 
-function CreateNewTaskModal({ onAdd }: { onAdd: (data: Partial<ActionItem>) => void }) {
+
+type CreateNewTaskModalProps = {
+    isModalOpen: boolean;
+    setIsModalOpen: Dispatch<SetStateAction<boolean>>
+    onAdd: (data: Partial<ActionItem>) => void
+}
+
+function CreateNewTaskModal({ onAdd, isModalOpen, setIsModalOpen }: CreateNewTaskModalProps) {
     const { register, handleSubmit, reset } = useForm<FormValues>();
 
     return (
-        <Dialog>
+        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
             <DialogTrigger asChild>
                 <Button>
                     <Plus size={16} className="mr-2" />

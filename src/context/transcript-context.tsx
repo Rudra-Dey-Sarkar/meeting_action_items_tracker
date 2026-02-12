@@ -6,6 +6,7 @@ import { Transcript } from "@/types/transcript";
 interface TranscriptContextType {
   currentTranscript: Transcript | null;
   setCurrentTranscript: (t: Transcript | null) => void;
+  isHistoryLoading: boolean;
   history: Transcript[];
   fetchTranscrips: () => Promise<void>;
 }
@@ -21,6 +22,7 @@ export function TranscriptProvider({
 }) {
   const [currentTranscript, setCurrentTranscript] = useState<Transcript | null>(null);
   const [history, setHistory] = useState<Transcript[]>([]);
+  const [isHistoryLoading, setIsHistoryLoading] = useState<boolean>(true);
 
   const fetchTranscrips = async () => {
     const res = await fetch("/api/transcripts");
@@ -28,6 +30,8 @@ export function TranscriptProvider({
       const data = await res.json();
       setHistory(data);
     }
+
+    setIsHistoryLoading(false);
   }
 
   useEffect(() => {
@@ -36,7 +40,7 @@ export function TranscriptProvider({
 
   return (
     <TranscriptContext.Provider
-      value={{ currentTranscript, setCurrentTranscript, history, fetchTranscrips }}
+      value={{ currentTranscript, setCurrentTranscript, isHistoryLoading, history, fetchTranscrips }}
     >
       {children}
     </TranscriptContext.Provider>

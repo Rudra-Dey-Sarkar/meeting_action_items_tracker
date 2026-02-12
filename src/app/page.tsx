@@ -34,73 +34,6 @@ export default function Home() {
     toast.success("Action items extracted");
   };
 
-  // Add Action Item
-  const addActionItem = async (form: Partial<ActionItem>) => {
-    if (!currentTranscript) return;
-
-    const res = await fetch("/api/action-items", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        ...form,
-        transcript_id: currentTranscript.id,
-      }),
-    });
-
-    if (!res.ok) return toast.error("Failed to add task");
-
-    const newItem = await res.json();
-
-    setCurrentTranscript({
-      ...currentTranscript,
-      action_items: [...(currentTranscript.action_items ?? []), newItem],
-    });
-    toast.success("Task added successfully");
-  };
-
-  // Update Item
-  const updateItem = async (id: string, data: Partial<ActionItem>) => {
-    const res = await fetch(`/api/action-items/${id}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    });
-
-    if (!res.ok) return toast.error("Failed to update task");
-
-    const updated = await res.json();
-
-    if (!currentTranscript) return;
-
-    setCurrentTranscript({
-      ...currentTranscript,
-      action_items: currentTranscript.action_items?.map((item) =>
-        item.id === id ? updated : item
-      ),
-    });
-    toast.success("Task updated successfully");
-  };
-
-  // Delete Item
-  const deleteItem = async (id: string) => {
-    const res = await fetch(`/api/action-items/${id}`, {
-      method: "DELETE",
-    });
-
-    if (!res.ok) return toast.error("Delete failed");
-
-    if (!currentTranscript) return;
-
-    setCurrentTranscript({
-      ...currentTranscript,
-      action_items: currentTranscript.action_items?.filter(
-        (item) => item.id !== id
-      ),
-    });
-
-    toast.warning("Task deleted successfully");
-  };
-
   return (
     <main className="w-full flex-1 p-4 md:p-6 overflow-auto">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 h-full">
@@ -116,10 +49,8 @@ export default function Home() {
           {currentTranscript ? (
             <div className="flex-1 overflow-auto">
               <ActionItemList
-                items={currentTranscript.action_items ?? []}
-                onAdd={addActionItem}
-                onUpdate={updateItem}
-                onDelete={deleteItem}
+                currentTranscript={currentTranscript}
+                setCurrentTranscript={setCurrentTranscript}
               />
             </div>
           ) : (

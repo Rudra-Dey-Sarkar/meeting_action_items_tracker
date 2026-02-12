@@ -17,7 +17,7 @@ import { FileText, LayoutDashboard, MonitorCheck } from "lucide-react";
 import Link from "next/link";
 
 export function AppSidebar() {
-    const { setCurrentTranscript, history } = useTranscript();
+    const { setCurrentTranscript, isHistoryLoading, history } = useTranscript();
 
     return (
         <Sidebar className="border-r">
@@ -65,26 +65,30 @@ export function AppSidebar() {
                     <SidebarGroupLabel>Recent Transcripts</SidebarGroupLabel>
                     <SidebarGroupContent className="space-y-1 mt-2">
 
-                        {history.length === 0 && (
+                        {(isHistoryLoading && history.length === 0) ?
                             <p className="text-xs text-muted-foreground px-2">
-                                No transcripts yet
-                            </p>
-                        )}
-
-                        {history.map((t) => (
-                            <Button
-                                key={t.id}
-                                variant="ghost"
-                                size="sm"
-                                className="w-full justify-start text-left truncate"
-                                onClick={() => setCurrentTranscript(t)}
-                            >
-                                <FileText className="w-4 h-4 mr-2 shrink-0" />
-                                <span className="truncate">
-                                    {t.content.substring(0, 30)}...
-                                </span>
-                            </Button>
-                        ))}
+                                Loading transcripts.....
+                            </p> : (!isHistoryLoading && history.length === 0) ?
+                                <p className="text-xs text-muted-foreground px-2">
+                                    No transcripts yet
+                                </p> :
+                                <div>
+                                    {history.map((t) => (
+                                        <Button
+                                            key={t.id}
+                                            variant="ghost"
+                                            size="sm"
+                                            className="w-full justify-start text-left truncate"
+                                            onClick={() => setCurrentTranscript(t)}
+                                        >
+                                            <FileText className="w-4 h-4 mr-2 shrink-0" />
+                                            <span className="truncate">
+                                                {t.content.substring(0, 30)}...
+                                            </span>
+                                        </Button>
+                                    ))}
+                                </div>
+                        }
 
                     </SidebarGroupContent>
                 </SidebarGroup>

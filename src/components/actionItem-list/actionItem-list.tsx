@@ -7,12 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Pencil, Check, X } from "lucide-react";
 import CreateNewTaskModal from "./create-new-task-modal";
 import Filters from "./filters";
+import { Transcript } from "@/types/transcript";
+import { toast } from "sonner";
 
 interface Props {
-    items: ActionItem[];
-    onAdd: (data: Partial<ActionItem>) => void;
-    onUpdate: (id: string, data: Partial<ActionItem>) => void;
-    onDelete: (id: string) => void;
+    currentTranscript: Transcript | null
+    setCurrentTranscript: (t: Transcript | null) => void
 }
 
 export interface FormValues {
@@ -22,15 +22,83 @@ export interface FormValues {
 }
 
 export function ActionItemList({
-    items,
-    onAdd,
-    onUpdate,
-    onDelete,
+    currentTranscript,
+    setCurrentTranscript
 }: Props) {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editValues, setEditValues] = useState<FormValues | null>(null);
     const [filter, setFilter] = useState<"all" | "pending" | "done">("all");
     const [dateFilter, setDateFilter] = useState<string>("");
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
+    // Add Action Item
+    const addActionItem = async (form: Partial<ActionItem>) => {
+        if (!currentTranscript) return;
+        setIsModalOpen(true);
+
+        const res = await fetch("/api/action-items", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                ...form,
+                transcript_id: currentTranscript.id,
+            }),
+        });
+
+        if (!res.ok) return toast.error("Failed to add task");
+
+        const newItem = await res.json();
+
+        setCurrentTranscript({
+            ...currentTranscript,
+            action_items: [...(currentTranscript.action_items ?? []), newItem],
+        });
+        setIsModalOpen(false);
+        toast.success("Task added successfully");
+    };
+
+    // Update Item
+    const updateItem = async (id: string, data: Partial<ActionItem>) => {
+        const res = await fetch(`/api/action-items/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+
+        if (!res.ok) return toast.error("Failed to update task");
+
+        const updated = await res.json();
+
+        if (!currentTranscript) return;
+
+        setCurrentTranscript({
+            ...currentTranscript,
+            action_items: currentTranscript.action_items?.map((item) =>
+                item.id === id ? updated : item
+            ),
+        });
+        toast.success("Task updated successfully");
+    };
+
+    // Delete Item
+    const deleteItem = async (id: string) => {
+        const res = await fetch(`/api/action-items/${id}`, {
+            method: "DELETE",
+        });
+
+        if (!res.ok) return toast.error("Delete failed");
+
+        if (!currentTranscript) return;
+
+        setCurrentTranscript({
+            ...currentTranscript,
+            action_items: currentTranscript.action_items?.filter(
+                (item) => item.id !== id
+            ),
+        });
+
+        toast.warning("Task deleted successfully");
+    };
 
     /* filter */
     const normalize = (date: string) => {
@@ -42,7 +110,7 @@ export function ActionItemList({
     };
 
     const filteredItems = useMemo(() => {
-        return items.filter((item) => {
+        return currentTranscript?.action_items?.filter((item) => {
             const statusMatch =
                 filter === "all" ? true : item.status === filter;
 
@@ -52,7 +120,7 @@ export function ActionItemList({
 
             return statusMatch && dateMatch;
         });
-    }, [items, filter, dateFilter]);
+    }, [currentTranscript?.action_items, filter, dateFilter]);
 
 
     return (
@@ -67,19 +135,22 @@ export function ActionItemList({
                     setDateFilter={setDateFilter}
                 />
 
-                <CreateNewTaskModal onAdd={onAdd} />
+                <CreateNewTaskModal 
+                onAdd={addActionItem} 
+                isModalOpen={isModalOpen}
+                setIsModalOpen={setIsModalOpen} />
             </div>
 
             {/* Items */}
             <div className="space-y-3">
 
-                {filteredItems.length === 0 && (
+                {filteredItems?.length === 0 && (
                     <div className="text-sm text-muted-foreground text-center p-6 border rounded-lg">
                         No matching tasks.
                     </div>
                 )}
 
-                {filteredItems.map((item) => {
+                {filteredItems?.map((item) => {
                     const isEditing = editingId === item.id;
 
                     return (
@@ -151,7 +222,7 @@ export function ActionItemList({
                                         <Button
                                             size="sm"
                                             onClick={() => {
-                                                onUpdate(item.id, editValues!);
+                                                updateItem(item.id, editValues!);
                                                 setEditingId(null);
                                             }}
                                         >
@@ -173,7 +244,7 @@ export function ActionItemList({
                                             variant="outline"
                                             className="cursor-pointer"
                                             onClick={() =>
-                                                onUpdate(item.id, {
+                                                updateItem(item.id, {
                                                     status:
                                                         item.status === "done"
                                                             ? "pending"
@@ -205,7 +276,7 @@ export function ActionItemList({
                                             size="sm"
                                             variant="destructive"
                                             className="cursor-pointer"
-                                            onClick={() => onDelete(item.id)}
+                                            onClick={() => deleteItem(item.id)}
                                         >
                                             Delete
                                         </Button>
