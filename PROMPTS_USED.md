@@ -1,6 +1,7 @@
 # Prompts Used
 
 ## Application Prompt (System Prompt for Extraction)
+
 used in \`src/lib/llm.ts\`:
 
 \`\`\`text
@@ -16,6 +17,7 @@ Strictly return a JSON array of objects with the following structure:
 ]
 
 Rules:
+
 - JSON only.
 - No explanation text.
 - No markdown code blocks.
@@ -28,6 +30,6 @@ ${transcript}
 \`\`\`
 
 ## Development Prompts
-- "Create a Next.js 15 app with Tailwind and ShadCN"
+
 - "Create a PostgreSQL schema for transcripts and action items"
 - "Write a Next.js API route to handle Groq API requests and database transactions"
