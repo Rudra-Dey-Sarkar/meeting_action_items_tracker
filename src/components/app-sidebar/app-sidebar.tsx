@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import {
     Sidebar,
     SidebarContent,
@@ -10,14 +10,14 @@ import {
     SidebarGroupContent,
     SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Transcript } from "@/types/transcript";
 import { useTranscript } from "@/context/transcript-context";
 import { Button } from "@/components/ui/button";
 import { FileText, LayoutDashboard, MonitorCheck } from "lucide-react";
 import Link from "next/link";
 
 export function AppSidebar() {
-    const { setCurrentTranscript, isHistoryLoading, history } = useTranscript();
+    const pathname = usePathname();
+    const { currentTranscript, setCurrentTranscript, isHistoryLoading, history } = useTranscript();
 
     return (
         <Sidebar className="border-r">
@@ -45,14 +45,14 @@ export function AppSidebar() {
 
                         <Link
                             href={"/"}
-                            className="flex gap-x-1 w-full justify-start items-center">
+                            className={`flex gap-x-1 w-full justify-start items-center p-1 rounded-r-full ${pathname === "/" ? "bg-gray-200" : ""}`}>
                             <LayoutDashboard className="w-4 h-4 mr-2" />
                             Dashboard
                         </Link>
 
                         <Link
                             href={"/status"}
-                            className="flex gap-x-1 w-full justify-start items-center">
+                            className={`flex gap-x-1 w-full justify-start items-center p-1 rounded-r-full ${pathname === "/status" ? "bg-gray-200" : ""}`}>
                             <MonitorCheck className="w-4 h-4 mr-2" />
                             App Status
                         </Link>
@@ -66,10 +66,10 @@ export function AppSidebar() {
                     <SidebarGroupContent className="space-y-1 mt-2">
 
                         {(isHistoryLoading && history.length === 0) ?
-                            <p className="text-xs text-muted-foreground px-2">
+                            <p className="text-base text-muted-foreground px-2">
                                 Loading transcripts.....
                             </p> : (!isHistoryLoading && history.length === 0) ?
-                                <p className="text-xs text-muted-foreground px-2">
+                                <p className="text-base text-muted-foreground px-2">
                                     No transcripts yet
                                 </p> :
                                 <div>
@@ -78,7 +78,7 @@ export function AppSidebar() {
                                             key={t.id}
                                             variant="ghost"
                                             size="sm"
-                                            className="w-full justify-start text-left truncate"
+                                            className={`w-full justify-start text-left truncate cursor-pointer ${t.id === currentTranscript?.id ? "underline" : ""}`}
                                             onClick={() => setCurrentTranscript(t)}
                                         >
                                             <FileText className="w-4 h-4 mr-2 shrink-0" />

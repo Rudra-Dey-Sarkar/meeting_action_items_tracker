@@ -1,6 +1,5 @@
 "use client";
 
-import { ActionItem } from "@/types/action-item";
 import { TranscriptInput } from "@/components/transcript-input/transcript-input";
 import { ActionItemList } from "@/components/actionItem-list/actionItem-list";
 import { toast } from "sonner";

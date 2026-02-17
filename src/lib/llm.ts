@@ -1,4 +1,4 @@
-import { ActionItem, ActionItemInput, ActionItemSchema } from "@/types/action-item";
+import { ActionItemInput, ActionItemSchema } from "@/types/action-item";
 import { z } from "zod";
 
 const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
@@ -15,6 +15,7 @@ Strictly return a JSON array of objects with the following structure:
 [
   {
     "task": "string description of the task",
+    "description": "1-2 line short summary of what needs to be done",
     "owner": "string name of the person responsible or null if not found",
     "due_date": "YYYY-MM-DD date string or null if not found"
   }

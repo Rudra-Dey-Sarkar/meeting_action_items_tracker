@@ -9,6 +9,7 @@ import CreateNewTaskModal from "./create-new-task-modal";
 import Filters from "./filters";
 import { Transcript } from "@/types/transcript";
 import { toast } from "sonner";
+import { Textarea } from "../ui/textarea";
 
 interface Props {
     currentTranscript: Transcript | null
@@ -17,6 +18,7 @@ interface Props {
 
 export interface FormValues {
     task: string;
+    description?: string;
     owner?: string;
     due_date?: string;
 }
@@ -135,10 +137,10 @@ export function ActionItemList({
                     setDateFilter={setDateFilter}
                 />
 
-                <CreateNewTaskModal 
-                onAdd={addActionItem} 
-                isModalOpen={isModalOpen}
-                setIsModalOpen={setIsModalOpen} />
+                <CreateNewTaskModal
+                    onAdd={addActionItem}
+                    isModalOpen={isModalOpen}
+                    setIsModalOpen={setIsModalOpen} />
             </div>
 
             {/* Items */}
@@ -171,6 +173,17 @@ export function ActionItemList({
                                                 })
                                             }
                                         />
+                                        <Textarea
+                                            value={editValues?.description || ""}
+                                            placeholder="Short description"
+                                            onChange={(e) =>
+                                                setEditValues({
+                                                    ...editValues!,
+                                                    description: e.target.value,
+                                                })
+                                            }
+                                        />
+
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                                             <Input
                                                 value={editValues?.owner || ""}
@@ -203,6 +216,9 @@ export function ActionItemList({
                                                 }`}
                                         >
                                             {item.task}
+                                        </p>
+                                        <p className="text-sm text-muted-foreground">
+                                            {item.description}
                                         </p>
                                         <p className="text-sm text-muted-foreground">
                                             {item.owner || "-"} |{" "}

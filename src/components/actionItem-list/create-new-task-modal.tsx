@@ -14,6 +14,7 @@ import { FormValues } from './actionItem-list';
 import { Plus } from 'lucide-react';
 import { Input } from '../ui/input';
 import { ActionItem } from '@/types/action-item';
+import { Textarea } from '../ui/textarea';
 
 
 type CreateNewTaskModalProps = {
@@ -48,6 +49,10 @@ function CreateNewTaskModal({ onAdd, isModalOpen, setIsModalOpen }: CreateNewTas
                 >
                     <Input
                         {...register("task", { required: true })}
+                        placeholder="Task"
+                    />
+                    <Textarea
+                        {...register("description", { required: true })}
                         placeholder="Task"
                     />
                     <Input {...register("owner")} placeholder="Owner" />

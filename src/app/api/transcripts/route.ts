@@ -41,9 +41,9 @@ export async function POST(req: NextRequest) {
 
             for (const item of actionItemsData) {
                 const itemRes = await sql`
-          INSERT INTO action_items (transcript_id, task, owner, due_date, status)
-          VALUES (${transcriptId}, ${item.task}, ${item.owner}, ${item.due_date}, 'pending')
-          RETURNING id, task, owner, due_date, status, created_at
+          INSERT INTO action_items (transcript_id, task, description, owner, due_date, status)
+          VALUES (${transcriptId}, ${item.task}, ${item.description ?? null}, ${item.owner}, ${item.due_date}, 'pending')
+          RETURNING *
         `;
                 insertedItems.push(itemRes[0]);
             }

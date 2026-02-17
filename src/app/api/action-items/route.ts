@@ -5,6 +5,7 @@ import { z } from "zod";
 const CreateItemSchema = z.object({
     transcript_id: z.string().uuid(),
     task: z.string().min(1),
+    description: z.string().nullable().optional(),
     owner: z.string().nullable().optional(),
     due_date: z.string().nullable().optional(),
 });
@@ -21,11 +22,11 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        const { transcript_id, task, owner, due_date } = validation.data;
+        const { transcript_id, task,description, owner, due_date } = validation.data;
 
         const result = await sql`
-      INSERT INTO action_items (transcript_id, task, owner, due_date, status)
-      VALUES (${transcript_id}, ${task}, ${owner ?? null}, ${due_date ?? null}, 'pending')
+      INSERT INTO action_items (transcript_id, task, description, owner, due_date, status)
+      VALUES (${transcript_id}, ${task}, ${description ?? null}, ${owner ?? null}, ${due_date ?? null}, 'pending')
       RETURNING *
     `;
 

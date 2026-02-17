@@ -4,6 +4,7 @@ import { z } from "zod";
 
 const PatchSchema = z.object({
     task: z.string().optional(),
+    description: z.string().nullable().optional(),
     owner: z.string().nullable().optional(),
     due_date: z.string().nullable().optional(),
     status: z.enum(["pending", "done"]).optional(),
@@ -32,6 +33,7 @@ export async function PATCH(
       UPDATE action_items
       SET
         task = COALESCE(${updates.task}, task),
+        description = COALESCE(${updates.description}, description),
         owner = COALESCE(${updates.owner}, owner),
         due_date = COALESCE(${updates.due_date}, due_date),
         status = COALESCE(${updates.status}, status)

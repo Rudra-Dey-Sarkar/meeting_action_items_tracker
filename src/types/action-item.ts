@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const ActionItemSchema = z.object({
     task: z.string(),
+    description: z.string().nullable().optional(),
     owner: z.string().nullable(),
     due_date: z.string().nullable(),
 });
