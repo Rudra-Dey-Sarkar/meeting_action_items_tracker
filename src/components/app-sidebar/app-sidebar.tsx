@@ -14,6 +14,7 @@ import { useTranscript } from "@/context/transcript-context";
 import { Button } from "@/components/ui/button";
 import { FileText, LayoutDashboard, MonitorCheck } from "lucide-react";
 import Link from "next/link";
+import TranscriptsSkeletonLoading from "./transcripts-skeleton-loading";
 
 export function AppSidebar() {
     const pathname = usePathname();
@@ -66,9 +67,8 @@ export function AppSidebar() {
                     <SidebarGroupContent className="space-y-1 mt-2">
 
                         {(isHistoryLoading && history.length === 0) ?
-                            <p className="text-sm text-muted-foreground px-2">
-                                Loading transcripts.....
-                            </p> : (!isHistoryLoading && history.length === 0) ?
+                            <TranscriptsSkeletonLoading />
+                            : (!isHistoryLoading && history.length === 0) ?
                                 <p className="text-sm text-muted-foreground px-2">
                                     No transcripts yet
                                 </p> :
