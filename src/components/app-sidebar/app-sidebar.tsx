@@ -17,7 +17,7 @@ import Link from "next/link";
 
 export function AppSidebar() {
     const pathname = usePathname();
-    const { currentTranscript, setCurrentTranscript, isHistoryLoading, history } = useTranscript();
+    const { currentTranscript, setCurrentTranscript, isHistoryLoading, history, fetchTranscrips } = useTranscript();
 
     return (
         <Sidebar className="border-r">
@@ -66,10 +66,10 @@ export function AppSidebar() {
                     <SidebarGroupContent className="space-y-1 mt-2">
 
                         {(isHistoryLoading && history.length === 0) ?
-                            <p className="text-base text-muted-foreground px-2">
+                            <p className="text-sm text-muted-foreground px-2">
                                 Loading transcripts.....
                             </p> : (!isHistoryLoading && history.length === 0) ?
-                                <p className="text-base text-muted-foreground px-2">
+                                <p className="text-sm text-muted-foreground px-2">
                                     No transcripts yet
                                 </p> :
                                 <div>
@@ -79,7 +79,10 @@ export function AppSidebar() {
                                             variant="ghost"
                                             size="sm"
                                             className={`w-full justify-start text-left truncate cursor-pointer ${t.id === currentTranscript?.id ? "underline" : ""}`}
-                                            onClick={() => setCurrentTranscript(t)}
+                                            onClick={() => {
+                                                fetchTranscrips();
+                                                setCurrentTranscript(t)
+                                            }}
                                         >
                                             <FileText className="w-4 h-4 mr-2 shrink-0" />
                                             <span className="truncate">

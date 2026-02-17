@@ -279,6 +279,7 @@ export function ActionItemList({
                                                 setEditingId(item.id);
                                                 setEditValues({
                                                     task: item.task,
+                                                    description: item.description || "",
                                                     owner: item.owner || "",
                                                     due_date:
                                                         item.due_date?.split("T")[0] || "",
